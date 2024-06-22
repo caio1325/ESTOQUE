@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Controle de Estoque</title>
+  </head>
+  <body>
+    <h1>Controle de Estoque</h1>
+
+    <div>
+      <h2>Adicionar Item</h2>
+      <input type="text" id="itemName" placeholder="Nome do Item" />
+      <input type="number" id="itemQuantity" placeholder="Quantidade" />
+      <button onclick="addItem()">Adicionar</button>
+    </div>
+
+    <div>
+      <h2>Registrar Saída</h2>
+      <input type="text" id="itemNameOut" placeholder="Nome do Item" />
+      <input type="number" id="itemQuantityOut" placeholder="Quantidade" />
+      <button onclick="removeItem()">Registrar Saída</button>
+    </div>
+
+    <div>
+      <h2>Estoque Atual</h2>
+      <ul id="inventoryList"></ul>
+    </div>
+
+    <script>
+      // Array para armazenar o estoque
+      let inventory = JSON.parse(localStorage.getItem("inventory")) || [];
+
+      // Função para adicionar itens ao estoque
+      function addItem() {
+        const itemName = document.getElementById("itemName").value;
+        const itemQuantity = parseInt(
+          document.getElementById("itemQuantity").value
+        );
+
+        // Verifica se o item já existe no estoque
+        const item = inventory.find((i) => i.name === itemName);
+
+        if (item) {
+          // Atualiza a quantidade se o item já existir
+          item.quantity += itemQuantity;
+        } else {
+          // Adiciona um novo item se não existir
+          inventory.push({ name: itemName, quantity: itemQuantity });
+        }
+
+        updateInventoryList();
+        updateLocalStorage();
+      }
+
+      // Função para registrar a saída de itens do estoque
+      function removeItem() {
+        const itemName = document.getElementById("itemNameOut").value;
+        const itemQuantity = parseInt(
+          document.getElementById("itemQuantityOut").value
+        );
+
+        const item = inventory.find((i) => i.name === itemName);
+
+        if (item) {
+          if (item.quantity >= itemQuantity) {
+            // Atualiza a quantidade se houver estoque suficiente
+            item.quantity -= itemQuantity;
+
+            // Remove o item se a quantidade for zero
+            if (item.quantity === 0) {
+              inventory = inventory.filter((i) => i.name !== itemName);
+            }
+
+            updateInventoryList();
+            updateLocalStorage();
+          } else {
+            alert("Quantidade insuficiente em estoque!");
+          }
+        } else {
+          alert("Item não encontrado no estoque!");
+        }
+      }
+
+      // Função para atualizar a lista de estoque na página
+      function updateInventoryList() {
+        const inventoryList = document.getElementById("inventoryList");
+        inventoryList.innerHTML = "";
+
+        inventory.forEach((item) => {
+          const listItem = document.createElement("li");
+          listItem.textContent = `${item.name}: ${item.quantity}`;
+          inventoryList.appendChild(listItem);
+        });
+      }
+      function updateLocalStorage() {
+        localStorage.setItem("inventory", JSON.stringify(inventory));
+      }
+      updateInventoryList();
+    </script>
+  </body>
+</html>
